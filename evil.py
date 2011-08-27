@@ -1,5 +1,5 @@
 from twisted.internet import reactor, defer
-from twisted.web.server import Site
+from twisted.web.server import Site, NOT_DONE_YET
 from twisted.web.resource import Resource
 from txroutes import Dispatcher
 import uuid
@@ -32,16 +32,13 @@ class Base(Resource):
             print "Couldn't find generator in session"
             self.sessions[c] = self._generator()
             begin = self.sessions[c].next()
-            print "Got %s" % begin
+            print "Got begin %s" % begin
             return String(begin)
         
 class String(Resource):
     def __init__(self, string):
         Resource.__init__(self)
         self.string = string
-
-    #def render(self, request):
-    #    return self.string
 
     def render_GET(self, request):
         return str( self.string )
@@ -60,15 +57,11 @@ class Running(Resource):
         the user sent us data here too, clicked a link or something.
         """
         print "Running sessions is %s" % self.sessions
-        val = self.sessions[ self.id ].send(request)
-        print "Got val"
+        val = self.sessions[ self.id ].next()
+        print "Got val %s" % val
         return val
         
-    def render_POST(self, request):
-        """
-        The user sent us data.
-        """
-        pass
+
 
 def generates():
     count = 1
